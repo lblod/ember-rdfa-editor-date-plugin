@@ -16,13 +16,13 @@ Once the plugin is configured in the appropriate editor profiles in `app/config/
 There are some defaults set, but you can add other supported date formats in the config of the host application. E.g.
 ```
 APP: {
-'ember-rdfa-editor-date-plugin': {
+    '@lblod/ember-rdfa-editor-date-plugin': {
         allowedInputDateFormats: ['DD/MM/YYYY', 'DD-MM-YYYY',  'DD.MM.YYYY'],
         outputDateFormat: 'D MMMM YYYY',
         moment: {
           includeLocales: ['nl']
         }
-      }
+    }
 }
 ```
 Please note, we have some preprocessing of data. You can customize these too through config.

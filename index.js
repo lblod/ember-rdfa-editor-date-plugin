@@ -11,6 +11,5 @@ module.exports = {
         includeLocales: (addonConfig['moment'] && addonConfig['moment']['includeLocales']) || ['nl-be']
       }
     };
-  },
-  isDevelopingAddon() { return true; }
+  }
 };
