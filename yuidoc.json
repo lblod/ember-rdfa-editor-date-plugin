@@ -1,5 +1,5 @@
 {
-  "name": "ember-rdfa-editor-date-plugin",
+  "name": "@lblod/ember-rdfa-editor-date-plugin",
   "description": "plugin responsible for correct annotation of dates",
   "version": "0.6.0",
   "options": {

@@ -1,13 +1,19 @@
-# ember-rdfa-editor-date-plugin
+# @lblod/ember-rdfa-editor-date-plugin
+
+Plugin to insert semantic dates in an RDFa editor
 
 ## Installation
-
 ```
-ember install git+https://github.com/lblod/ember-rdfa-editor-date-plugin.git
+ember install @lblod/ember-rdfa-editor
+ember install @lblod/ember-rdfa-editor-date-plugin
 ```
 
 ## Configuration
-There are some defaults set, but you can add other supported formats in the config of the consuming application. e.g.
+The plugin will automatically be added in the `default` and `all` editor profiles in `app/config/editor-profiles.js`. Add the plugin name `rdfa-editor-date-plugin` to other editor profiles if you want to enable the plugin in these profiles, too.
+
+Once the plugin is configured in the appropriate editor profiles in `app/config/editor-profiles.js` it will be automatically be picked up by the rdfa-editor.
+
+There are some defaults set, but you can add other supported date formats in the config of the host application. E.g.
 ```
 APP: {
 'ember-rdfa-editor-date-plugin': {
