@@ -21,11 +21,13 @@ export default Service.extend({
     'DD-MM-YYYY': '[0-9]{1,2}[/.-][0-9]{1,2}[/.-][0-9]{4}',
     'DD.MM.YYYY': '[0-9]{1,2}[/.-][0-9]{1,2}[/.-][0-9]{4}' },
 
+  zittingUri: 'http://data.vlaanderen.be/ns/besluit#Zitting',
   artikelUri: 'http://data.vlaanderen.be/ns/besluit#Artikel',
   aanstellingUri: 'http://data.vlaanderen.be/ns/mandaat#AanstellingsBesluit',
   ontslagUri: 'http://data.vlaanderen.be/ns/mandaat#OntslagBesluit',
   generiekBesluitUri: 'http://data.vlaanderen.be/ns/besluit#Besluit',
   dateTypeUri: 'http://www.w3.org/2001/XMLSchema#date',
+  dcTitleUri: 'http://purl.org/dc/terms/title',
   genericContextLabel: 'genericContext',
 
   /**
@@ -57,6 +59,11 @@ export default Service.extend({
     rdfaAnnotationsMap[this.get('genericContextLabel')] = {
       label: 'Wilde u deze creatiedatum ingeven?',
       template: (content, display) => `<span class="annotation" property="dcterms:created" datatype="xsd:date" content="${content}">${display}</span>`
+    };
+
+    rdfaAnnotationsMap['titleNotule'] = {
+      label: 'Wilde u deze geplande start ingeven?',
+      template: (content, display) => `<span class="annotation" property="besluit:geplandeStart" datatype="xsd:date" content="${content}">${display}</span>`
     };
 
     return rdfaAnnotationsMap;
@@ -125,14 +132,26 @@ export default Service.extend({
     let isAanstellingsBesluit = node => { return node.predicate == 'a' && node.object == this.get('aanstellingUri'); };
     let isOntslagBesluit = node => { return node.predicate == 'a' && node.object == this.get('ontslagUri'); };
     let isGeneriekBesluit = node => { return node.predicate == 'a' && node.object == this.get('generiekBesluit'); };
-    let isAnnotedDate = node => {return node.datatype == this.get('dateTypeUri'); };
+    let isAnnotedDate = node => { return node.datatype == this.get('dateTypeUri'); };
+    let isDcTitle = node => { return node.predicate === this.get('dcTitleUri'); };
+    let isZitting = node => { return node.predicate === 'a' && node.object === this.get('zittingUri'); };
+
+    let isTitleNotule = context => {
+      if(context.length !== 3) return false;
+      if(!isZitting(context[1])) return false;
+      if(!isDcTitle(context[2])) return false;
+
+      return true;
+    };
 
     //TODO: currently, if annoted date is modified again, output is broken. Needs specific flow.
     if(context.context.findIndex(isAnnotedDate) >= 0) return '';
 
+    if(isTitleNotule(context.context)) return 'titleNotule';
+
     if(context.context.findIndex(isArtikel) < 0) return this.get('genericContextLabel');
 
-    let typeBesluitFilter = node => {return isAanstellingsBesluit(node) || isOntslagBesluit(node) || isGeneriekBesluit(node); };
+    let typeBesluitFilter = node => { return isAanstellingsBesluit(node) || isOntslagBesluit(node) || isGeneriekBesluit(node); };
 
     let besluitTriple = context.context.find(typeBesluitFilter);
     return besluitTriple ? besluitTriple.object : this.get('genericContextLabel');
