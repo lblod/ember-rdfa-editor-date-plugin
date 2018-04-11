@@ -2,6 +2,7 @@ import { getOwner } from '@ember/application';
 import Service from '@ember/service';
 import EmberObject, { computed } from '@ember/object';
 import moment from 'moment';
+import { task } from 'ember-concurrency';
 
 /**
  * Service responsible for correct annotation of dates
@@ -70,6 +71,7 @@ export default Service.extend({
   }),
 
   init(){
+    this._super(...arguments);
     let config = getOwner(this).resolveRegistration('config:environment');
     this.set('outputDateFormat', config['outputDateFormat']);
     this.set('allowedInputDateFormats', config['allowedInputDateFormats'] || this.get('allowedInputDateFormats'));
@@ -78,7 +80,7 @@ export default Service.extend({
   },
 
   /**
-   * Handles the incoming events from the editor dispatcher asynchronous
+   * Restartable task to handle the incoming events from the editor dispatcher
    *
    * @method execute
    *
@@ -87,12 +89,9 @@ export default Service.extend({
    * @param {Object} hintsRegistry Registry of hints in the editor
    * @param {Object} editor The RDFa editor instance
    *
-   * @return {Promise} A promise that resolves when the hints registry has been updated
-   *                  (adding new hints and removing outdated hints)
-   *
    * @public
    */
-  async execute(hrId, contexts, hintsRegistry, editor) {
+  execute: task(function * (hrId, contexts, hintsRegistry, editor) {
     if (contexts.length === 0) return;
 
     let cards = [];
@@ -114,7 +113,7 @@ export default Service.extend({
     if(cards.length > 0){
       hintsRegistry.addHints(hrId, this.get('who'), cards);
     }
-  },
+  }).restartable(),
 
   /**
    * Given context object, tries to detect a context the plugin can work on
