@@ -40,7 +40,7 @@ export default Service.extend({
    * @private
    */
   rdfaAnnotationsMap: computed(function(){
-    let rdfaAnnotationsMap = {};
+    const rdfaAnnotationsMap = {};
 
     rdfaAnnotationsMap[this.get('ontslagUri')] = {
       label: 'Wilde u deze ontslagdatum ingeven?',
@@ -72,10 +72,10 @@ export default Service.extend({
 
   init(){
     this._super(...arguments);
-    let config = getOwner(this).resolveRegistration('config:environment');
+    const config = getOwner(this).resolveRegistration('config:environment');
     this.set('outputDateFormat', config['outputDateFormat']);
     this.set('allowedInputDateFormats', config['allowedInputDateFormats'] || this.get('allowedInputDateFormats'));
-    let preprocessingMap = Object.assign(this.get('preprocessingFormatsMap'), config['preprocessingFormatsMap']);
+    const preprocessingMap = Object.assign(this.get('preprocessingFormatsMap'), config['preprocessingFormatsMap']);
     this.set('preprocessingMap', this.initPreprocessingMap(preprocessingMap));
   },
 
@@ -94,16 +94,16 @@ export default Service.extend({
   execute: task(function * (hrId, contexts, hintsRegistry, editor) {
     if (contexts.length === 0) return;
 
-    let cards = [];
+    const cards = [];
 
     for(let context of contexts){
-      let detectedContext = this.detectRelevantContext(context);
+      const detectedContext = this.detectRelevantContext(context);
 
       if (!detectedContext) continue;
 
-      let rdfaAnnotation = this.get('rdfaAnnotationsMap')[detectedContext];
+      const rdfaAnnotation = this.get('rdfaAnnotationsMap')[detectedContext];
 
-      let hints = this.generateHintsForContext(context);
+      const hints = this.generateHintsForContext(context);
 
       hintsRegistry.removeHintsInRegion(context.region, hrId, this.get('who'));
 
@@ -127,15 +127,15 @@ export default Service.extend({
    * @private
    */
   detectRelevantContext(context){
-    let isArtikel = node => { return node.predicate == 'a' && node.object == this.get('artikelUri'); };
-    let isAanstellingsBesluit = node => { return node.predicate == 'a' && node.object == this.get('aanstellingUri'); };
-    let isOntslagBesluit = node => { return node.predicate == 'a' && node.object == this.get('ontslagUri'); };
-    let isGeneriekBesluit = node => { return node.predicate == 'a' && node.object == this.get('generiekBesluit'); };
-    let isAnnotedDate = node => { return node.datatype == this.get('dateTypeUri'); };
-    let isDcTitle = node => { return node.predicate === this.get('dcTitleUri'); };
-    let isZitting = node => { return node.predicate === 'a' && node.object === this.get('zittingUri'); };
+    const isArtikel = node => { return node.predicate == 'a' && node.object == this.get('artikelUri'); };
+    const isAanstellingsBesluit = node => { return node.predicate == 'a' && node.object == this.get('aanstellingUri'); };
+    const isOntslagBesluit = node => { return node.predicate == 'a' && node.object == this.get('ontslagUri'); };
+    const isGeneriekBesluit = node => { return node.predicate == 'a' && node.object == this.get('generiekBesluit'); };
+    const isAnnotedDate = node => { return node.datatype == this.get('dateTypeUri'); };
+    const isDcTitle = node => { return node.predicate === this.get('dcTitleUri'); };
+    const isZitting = node => { return node.predicate === 'a' && node.object === this.get('zittingUri'); };
 
-    let isTitleNotule = context => {
+    const isTitleNotule = context => {
       if(context.length !== 3) return false;
       if(!isZitting(context[1])) return false;
       if(!isDcTitle(context[2])) return false;
@@ -150,9 +150,9 @@ export default Service.extend({
 
     if(context.context.findIndex(isArtikel) < 0) return this.get('genericContextLabel');
 
-    let typeBesluitFilter = node => { return isAanstellingsBesluit(node) || isOntslagBesluit(node) || isGeneriekBesluit(node); };
+    const typeBesluitFilter = node => { return isAanstellingsBesluit(node) || isOntslagBesluit(node) || isGeneriekBesluit(node); };
 
-    let besluitTriple = context.context.find(typeBesluitFilter);
+    const besluitTriple = context.context.find(typeBesluitFilter);
     return besluitTriple ? besluitTriple.object : this.get('genericContextLabel');
   },
 
@@ -169,7 +169,7 @@ export default Service.extend({
    */
   scanForDate(data){
     for(let allowedInputFormat of this.get('allowedInputDateFormats')){
-      let subString = data.slice(0, allowedInputFormat.length);
+      const subString = data.slice(0, allowedInputFormat.length);
       if(this.isPotentialDate(subString, allowedInputFormat) && this.isValidDate(subString, allowedInputFormat)){
         return subString;
       }
@@ -202,7 +202,7 @@ export default Service.extend({
    * @private
    */
   isPotentialDate(data, inputFormat){
-    let regexDate = this.get('preprocessingMap')[inputFormat];
+    const regexDate = this.get('preprocessingMap')[inputFormat];
     if(regexDate){
       return regexDate.test(data);
     }
@@ -241,9 +241,9 @@ export default Service.extend({
    * @private
    */
   generateCard(hrId, rdfaAnnotation, hintsRegistry, editor, hint){
-    let userParsedDate =  moment(hint.dateString, this.get('allowedInputDateFormats')).format(this.get('outputDateFormat'));
-    let rdfaContent = moment(hint.dateString, this.get('allowedInputDateFormats')).format(this.get('rdfaOutput'));
-    let htmlValue = rdfaAnnotation.template(rdfaContent, userParsedDate);
+    const userParsedDate =  moment(hint.dateString, this.get('allowedInputDateFormats')).format(this.get('outputDateFormat'));
+    const rdfaContent = moment(hint.dateString, this.get('allowedInputDateFormats')).format(this.get('rdfaOutput'));
+    const htmlValue = rdfaAnnotation.template(rdfaContent, userParsedDate);
     return EmberObject.create({
       info: {
         value: htmlValue, label: rdfaAnnotation.label,
@@ -268,18 +268,18 @@ export default Service.extend({
    * @private
    */
   generateHintsForContext(context){
-    let hints = [];
-    let stringToScan = context.text;
+    const hints = [];
+    const stringToScan = context.text;
 
-    for(var i=0; i < stringToScan.length; ++i){
-      let dateString = stringToScan.slice(i);
-      let scannedDate = this.scanForDate(dateString);
+    for(let i=0; i < stringToScan.length; ++i){
+      const dateString = stringToScan.slice(i);
+      const scannedDate = this.scanForDate(dateString);
 
       if(!scannedDate){
         continue;
       }
 
-      let location = this.normalizeLocation([i, i + scannedDate.length], context.region);
+      const location = this.normalizeLocation([i, i + scannedDate.length], context.region);
 
       hints.push({dateString, location});
 
@@ -297,7 +297,7 @@ export default Service.extend({
    * @private
    */
   initPreprocessingMap(preProcessingMap){
-    let initMap = {};
+    const initMap = {};
     Object.keys(preProcessingMap).forEach(key => {
       initMap[key] = new RegExp(preProcessingMap[key], 'g');
     });
