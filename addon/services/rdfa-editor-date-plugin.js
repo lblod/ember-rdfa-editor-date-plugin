@@ -91,7 +91,7 @@ export default Service.extend({
    *
    * @public
    */
-  execute: task(function * (hrId, contexts, hintsRegistry, editor) {
+  execute: task(function * (hrId, contexts, hintsRegistry, editor) { // eslint-disable-line require-yield
     if (contexts.length === 0) return;
 
     const cards = [];
