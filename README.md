@@ -27,4 +27,3 @@ APP: {
 ```
 Please note, we have some preprocessing of data. You can customize these too through config.
 Note: Using custom formats might affect performance, if you don't update the preprocessing formats. See code how.
-
