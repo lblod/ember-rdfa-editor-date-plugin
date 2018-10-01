@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  name: '@lblod/ember-rdfa-editor-date-plugin',
+  name: require('./package').name,
   config: function (env, config) {
     let addonConfig = (config['APP'] && config['APP'][this.name])|| {};
     return {
