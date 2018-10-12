@@ -1,8 +1,10 @@
 import { getOwner } from '@ember/application';
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
+import memoize from '../utils/memoize';
 import EmberObject, { computed } from '@ember/object';
 import moment from 'moment';
 import { task } from 'ember-concurrency';
+import { findPropertiesWithRange } from '@lblod/ember-generic-model-plugin-utils/utils/meta-model-utils';
 
 /**
  * Service responsible for correct annotation of dates
@@ -13,6 +15,7 @@ import { task } from 'ember-concurrency';
  * @extends EmberService
  */
 export default Service.extend({
+  store: service(),
   who: 'editor-plugins/date-card',
   outputDateFormat: 'DD/MM/YYYY',
   rdfaOutput: 'YYYY-MM-DD',
@@ -22,54 +25,6 @@ export default Service.extend({
     'DD-MM-YYYY': '[0-9]{1,2}[/.-][0-9]{1,2}[/.-][0-9]{4}',
     'DD.MM.YYYY': '[0-9]{1,2}[/.-][0-9]{1,2}[/.-][0-9]{4}' },
 
-  zittingUri: 'http://data.vlaanderen.be/ns/besluit#Zitting',
-  artikelUri: 'http://data.vlaanderen.be/ns/besluit#Artikel',
-  aanstellingUri: 'http://data.vlaanderen.be/ns/mandaat#AanstellingsBesluit',
-  ontslagUri: 'http://data.vlaanderen.be/ns/mandaat#OntslagBesluit',
-  generiekBesluitUri: 'http://data.vlaanderen.be/ns/besluit#Besluit',
-  dateTypeUri: 'http://www.w3.org/2001/XMLSchema#date',
-  dcTitleUri: 'http://purl.org/dc/terms/title',
-  genericContextLabel: 'genericContext',
-
-  /**
-   * A map between Context URI, and annotation to use.
-   *
-   * @property rdfaAnnotationMap
-   * @type {Object}
-   *
-   * @private
-   */
-  rdfaAnnotationsMap: computed(function(){
-    const rdfaAnnotationsMap = {};
-
-    rdfaAnnotationsMap[this.get('ontslagUri')] = {
-      label: 'Wilde u deze ontslagdatum ingeven?',
-      template: (content, display) => `<span class="annotation" property="mandaat:einde" datatype="xsd:date" content="${content}">${display}</span>`
-    };
-
-    rdfaAnnotationsMap[this.get('aanstellingUri')] = {
-      label: 'Wilde u deze aanstellingsdatum ingeven?',
-      template: (content, display) => `<span class="annotation" property="mandaat:start" datatype="xsd:date" content="${content}">${display}</span>`
-    };
-
-    rdfaAnnotationsMap[this.get('generiekBesluitUri')] = {
-      label: 'Wilde u deze creatiedatum ingeven?',
-      template: (content, display) => `<span class="annotation" property="dcterms:created" datatype="xsd:date" content="${content}">${display}</span>`
-    };
-
-    rdfaAnnotationsMap[this.get('genericContextLabel')] = {
-      label: 'Wilde u deze creatiedatum ingeven?',
-      template: (content, display) => `<span class="annotation" property="dcterms:created" datatype="xsd:date" content="${content}">${display}</span>`
-    };
-
-    rdfaAnnotationsMap['titleNotule'] = {
-      label: 'Wilde u deze geplande start ingeven?',
-      template: (content, display) => `<span class="annotation" property="besluit:geplandeStart" datatype="xsd:date" content="${content}">${display}</span>`
-    };
-
-    return rdfaAnnotationsMap;
-  }),
-
   init(){
     this._super(...arguments);
     const config = getOwner(this).resolveRegistration('config:environment');
@@ -77,6 +32,8 @@ export default Service.extend({
     this.set('allowedInputDateFormats', config['allowedInputDateFormats'] || this.get('allowedInputDateFormats'));
     const preprocessingMap = Object.assign(this.get('preprocessingFormatsMap'), config['preprocessingFormatsMap']);
     this.set('preprocessingMap', this.initPreprocessingMap(preprocessingMap));
+    this.set('memoizedFindPropertiesWithRange',
+         memoize((classType, range) => findPropertiesWithRange(this.store, classType, range)));
   },
 
   /**
@@ -91,23 +48,24 @@ export default Service.extend({
    *
    * @public
    */
-  execute: task(function * (hrId, contexts, hintsRegistry, editor) { // eslint-disable-line require-yield
+  execute: task(function * (hrId, contexts, hintsRegistry, editor, extraInfo = []) { // eslint-disable-line require-yield
     if (contexts.length === 0) return;
 
     const cards = [];
 
     for(let context of contexts){
-      const detectedContext = this.detectRelevantContext(context);
 
-      if (!detectedContext) continue;
+      let rdfaProperties = yield this.detectRdfaPropertiesToUse(context);
 
-      const rdfaAnnotation = this.get('rdfaAnnotationsMap')[detectedContext];
+      if(rdfaProperties.length == 0) continue;
 
-      const hints = this.generateHintsForContext(context);
+      let hints = yield this.generateHintsForContext(context);
+
+      if(hints.length == 0) continue;
 
       hintsRegistry.removeHintsInRegion(context.region, hrId, this.get('who'));
 
-      cards.push(...hints.map(hint => { return this.generateCard(hrId, rdfaAnnotation, hintsRegistry, editor, hint); }));
+      cards.push(...this.generateCards(hrId, rdfaProperties, hintsRegistry, editor, hints));
     }
 
     if(cards.length > 0){
@@ -115,45 +73,15 @@ export default Service.extend({
     }
   }).restartable(),
 
-  /**
-   * Given context object, tries to detect a context the plugin can work on
-   *
-   * @method detectRelevantContext
-   *
-   * @param {Object} context Text snippet at a specific location with an RDFa context
-   *
-   * @return {String} URI of context if found, else empty string.
-   *
-   * @private
-   */
-  detectRelevantContext(context){
-    const isArtikel = node => { return node.predicate == 'a' && node.object == this.get('artikelUri'); };
-    const isAanstellingsBesluit = node => { return node.predicate == 'a' && node.object == this.get('aanstellingUri'); };
-    const isOntslagBesluit = node => { return node.predicate == 'a' && node.object == this.get('ontslagUri'); };
-    const isGeneriekBesluit = node => { return node.predicate == 'a' && node.object == this.get('generiekBesluit'); };
-    const isAnnotedDate = node => { return node.datatype == this.get('dateTypeUri'); };
-    const isDcTitle = node => { return node.predicate === this.get('dcTitleUri'); };
-    const isZitting = node => { return node.predicate === 'a' && node.object === this.get('zittingUri'); };
-
-    const isTitleNotule = context => {
-      if(context.length !== 3) return false;
-      if(!isZitting(context[1])) return false;
-      if(!isDcTitle(context[2])) return false;
-
-      return true;
-    };
-
-    //TODO: currently, if annoted date is modified again, output is broken. Needs specific flow.
-    if(context.context.findIndex(isAnnotedDate) >= 0) return '';
-
-    if(isTitleNotule(context.context)) return 'titleNotule';
-
-    if(context.context.findIndex(isArtikel) < 0) return this.get('genericContextLabel');
-
-    const typeBesluitFilter = node => { return isAanstellingsBesluit(node) || isOntslagBesluit(node) || isGeneriekBesluit(node); };
-
-    const besluitTriple = context.context.find(typeBesluitFilter);
-    return besluitTriple ? besluitTriple.object : this.get('genericContextLabel');
+  async detectRdfaPropertiesToUse(context){
+    let lastTriple = context.context.slice(-1)[0] || {};
+    if(!lastTriple.predicate == 'a')
+      return [];
+    let classType = lastTriple.object;
+    return await this.memoizedFindPropertiesWithRange(classType, "http://www.w3.org/2001/XMLSchema#date");
+    //TODO: tbd
+    //let dateTimeContexts = await this.memoizedFindPropertiesWithRange(classType, "http://www.w3.org/2001/XMLSchema#dateTime");
+    //return [...dateContexts.toArray(), ...dateTimeContexts.toArray()];
   },
 
   /**
@@ -225,13 +153,24 @@ export default Service.extend({
     return [location[0] + reference[0], location[1] + reference[0]];
   },
 
+  generateCards(hrId, rdfaProperties, hintsRegistry, editor, hints){
+    let cards = [];
+    hints.forEach(hint => {
+      rdfaProperties.forEach(rdfaProperty => {
+        let card = this.generateCard(hrId, rdfaProperty, hintsRegistry, editor, hint);
+        cards.push(card);
+      });
+    });
+    return cards;
+  },
+
   /**
    * Generates a card given a hint
    *
    * @method generateCard
    *
    * @param {string} hrId Unique identifier of the event in the hintsRegistry
-   * @param {Object} rdfaAnnotation object
+   * @param {Object} rdfaProperty metamodel property
    * @param {Object} hintsRegistry Registry of hints in the editor
    * @param {Object} editor The RDFa editor instance
    * @param {Object} hint containing the hinted string and the location of this string
@@ -240,16 +179,15 @@ export default Service.extend({
    *
    * @private
    */
-  generateCard(hrId, rdfaAnnotation, hintsRegistry, editor, hint){
+  generateCard(hrId, rdfaProperty, hintsRegistry, editor, hint){
     const userParsedDate =  moment(hint.dateString, this.get('allowedInputDateFormats')).format(this.get('outputDateFormat'));
     const rdfaContent = moment(hint.dateString, this.get('allowedInputDateFormats')).format(this.get('rdfaOutput'));
-    const htmlValue = rdfaAnnotation.template(rdfaContent, userParsedDate);
     return EmberObject.create({
       info: {
-        value: htmlValue, label: rdfaAnnotation.label,
+        rdfaContent,
         plainValue: userParsedDate,
         location: hint.location,
-        hrId, hintsRegistry, editor
+        hrId, hintsRegistry, editor, rdfaProperty
       },
       location: hint.location,
       card: this.get('who')
