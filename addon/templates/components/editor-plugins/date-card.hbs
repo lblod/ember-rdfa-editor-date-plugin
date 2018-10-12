@@ -1,35 +1,14 @@
 <p class="u-spacer--tiny">
-  {{info.label}} <br>
-  <strong>{{info.plainValue}}</strong>
+  Voeg <strong>{{info.plainValue}}</strong> als
+   <br> <strong>{{info.rdfaProperty.label}}</strong> in.
 </p>
 
 {{#wu-button-group}}
   {{wu-button
-    label="Juist"
+    label="voeg toe"
     size="small"
     isNarrow=true
-    command="ctrl + j"
-    commandLocation="below"
-    onClick=(action "insert")
-  }}
-  {{wu-button
-    label="Zoek verder"
-    size="small"
-    isAlt=true
-    isNarrow=true
-    command="ctrl + f"
-    commandLocation="below"
-    onClick=null
-  }}
-  {{wu-button
-    label="Negeer"
-    size="tiny"
-    isLink=true
-    isDark=true
-    isNarrow=true
-    command="esc"
-    commandLocation="below"
-    onClick=null
+    onClick=(action "insert" info)
   }}
 {{/wu-button-group}}
 
