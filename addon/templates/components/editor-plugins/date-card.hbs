@@ -7,10 +7,10 @@
         <div class="double-input js-double-input">
           <div class="double-input__inputs">
             <div class="double-input__input" style="width:30%">
-              {{input class="input-field input-field--block" placeholder="12" type="number" value=hour}} uur
+              {{input class="input-field input-field--block" placeholder="12" type="number" value=hour min=0 max=12}} uur
             </div>
             <div class="double-input__input" style="width:30%">
-              {{input class="input-field input-field--block" placeholder="00" type="number" value=minutes}} minuten
+              {{input class="input-field input-field--block" placeholder="00" type="number" value=minutes min=0 max=59}} minuten
             </div>
       </div>
     </div>
