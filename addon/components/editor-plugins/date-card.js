@@ -29,7 +29,7 @@ export default Component.extend(InsertPrimitivePropertyCardMixin, {
 
     async insertDateTime(data, hours, minutes){
       let dateTimeIso = moment(data.rdfaContent, data.rdfaContentDateFormat).hours(hours || 0).minutes(minutes || 0).toISOString();
-      let timeIfPresent = hours ? `om ${hours} uur ${minutes || '00'} minuten` : '';
+      let timeIfPresent = hours ? ` ${hours}:${minutes || '00'}` : '';
       let value = `${data.plainValue} ${timeIfPresent}`;
 
       this.insert(await data.rdfaProperty,
