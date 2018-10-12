@@ -1,7 +1,7 @@
 import { getOwner } from '@ember/application';
 import Service, { inject as service } from '@ember/service';
 import memoize from '../utils/memoize';
-import EmberObject, { computed } from '@ember/object';
+import EmberObject from '@ember/object';
 import moment from 'moment';
 import { task } from 'ember-concurrency';
 import { findPropertiesWithRange } from '@lblod/ember-generic-model-plugin-utils/utils/meta-model-utils';
@@ -48,7 +48,7 @@ export default Service.extend({
    *
    * @public
    */
-  execute: task(function * (hrId, contexts, hintsRegistry, editor, extraInfo = []) { // eslint-disable-line require-yield
+  execute: task(function * (hrId, contexts, hintsRegistry, editor) { // eslint-disable-line require-yield
     if (contexts.length === 0) return;
 
     const cards = [];
