@@ -78,10 +78,9 @@ export default Service.extend({
     if(!lastTriple.predicate == 'a')
       return [];
     let classType = lastTriple.object;
-    return await this.memoizedFindPropertiesWithRange(classType, "http://www.w3.org/2001/XMLSchema#date");
-    //TODO: tbd
-    //let dateTimeContexts = await this.memoizedFindPropertiesWithRange(classType, "http://www.w3.org/2001/XMLSchema#dateTime");
-    //return [...dateContexts.toArray(), ...dateTimeContexts.toArray()];
+    let dateContexts = await this.memoizedFindPropertiesWithRange(classType, "http://www.w3.org/2001/XMLSchema#date");
+    let dateTimeContexts = await this.memoizedFindPropertiesWithRange(classType, "http://www.w3.org/2001/XMLSchema#dateTime");
+    return [...dateContexts.toArray(), ...dateTimeContexts.toArray()];
   },
 
   /**
@@ -184,6 +183,7 @@ export default Service.extend({
     const rdfaContent = moment(hint.dateString, this.get('allowedInputDateFormats')).format(this.get('rdfaOutput'));
     return EmberObject.create({
       info: {
+        rdfaContentDateFormat: this.get('rdfaOutput'),
         rdfaContent,
         plainValue: userParsedDate,
         location: hint.location,

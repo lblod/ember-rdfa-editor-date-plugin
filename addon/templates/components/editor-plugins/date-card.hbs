@@ -1,15 +1,44 @@
-<p class="u-spacer--tiny">
-  Voeg <strong>{{info.plainValue}}</strong> als
-   <br> <strong>{{info.rdfaProperty.label}}</strong> in.
-</p>
+<! -- SORRY MIET HACK ALERT !!! -->
+{{#if isDateTime }}
+  <div class="grid">
+    <form class="form col--12-12 col--1-1--s">
+      <div class="u-spacer--tiny">
+        Voeg <strong>{{info.plainValue}}</strong> op tijdstip
+        <div class="double-input js-double-input">
+          <div class="double-input__inputs">
+            <div class="double-input__input" style="width:30%">
+              {{input class="input-field input-field--block" placeholder="12" type="number" value=hour}} uur
+            </div>
+            <div class="double-input__input" style="width:30%">
+              {{input class="input-field input-field--block" placeholder="00" type="number" value=minutes}} minuten
+            </div>
+      </div>
+    </div>
+    <strong>{{info.rdfaProperty.label}}</strong> in.
+      </div>
+    </form>
+  </div>
+  {{#wu-button-group}}
+    {{wu-button
+      label="voeg toe"
+      size="small"
+      isNarrow=true
+      onClick=(action "insertDateTime" info hour minutes)
+    }}
+  {{/wu-button-group}}
 
-{{#wu-button-group}}
-  {{wu-button
-    label="voeg toe"
-    size="small"
-    isNarrow=true
-    onClick=(action "insert" info)
-  }}
-{{/wu-button-group}}
+{{else}}
+  <div class="u-spacer--tiny">
+    Voeg <strong>{{info.plainValue}}</strong> als <strong>{{info.rdfaProperty.label}}</strong> in.
+  </div>
+  {{#wu-button-group}}
+    {{wu-button
+      label="voeg toe"
+      size="small"
+      isNarrow=true
+      onClick=(action "insert" info)
+    }}
+  {{/wu-button-group}}
 
+{{/if}}
 {{yield}}
