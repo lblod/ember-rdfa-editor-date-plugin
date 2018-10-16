@@ -75,12 +75,15 @@ export default Service.extend({
 
   async detectRdfaPropertiesToUse(context){
     let lastTriple = context.context.slice(-1)[0] || {};
-    if(!lastTriple.predicate == 'a')
-      return [];
-    let classType = lastTriple.object;
-    let dateContexts = await this.memoizedFindPropertiesWithRange(classType, "http://www.w3.org/2001/XMLSchema#date");
-    let dateTimeContexts = await this.memoizedFindPropertiesWithRange(classType, "http://www.w3.org/2001/XMLSchema#dateTime");
+    let classType = this.findTypeForSubject(context, lastTriple.subject);
+    if(!classType || classType.trim().length == 0) return [];
+    let dateContexts = await this.memoizedFindPropertiesWithRange(classType.trim(), "http://www.w3.org/2001/XMLSchema#date");
+    let dateTimeContexts = await this.memoizedFindPropertiesWithRange(classType.trim(), "http://www.w3.org/2001/XMLSchema#dateTime");
     return [...dateContexts.toArray(), ...dateTimeContexts.toArray()];
+  },
+
+  findTypeForSubject(context, subject){
+    return (context.context.find(t => t.subject == subject && t.predicate == 'a') || {}).object;
   },
 
   /**
