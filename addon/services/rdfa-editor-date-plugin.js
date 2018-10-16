@@ -4,7 +4,6 @@ import memoize from '../utils/memoize';
 import EmberObject from '@ember/object';
 import moment from 'moment';
 import { task } from 'ember-concurrency';
-import { findPropertiesWithRange } from '@lblod/ember-generic-model-plugin-utils/utils/meta-model-utils';
 
 /**
  * Service responsible for correct annotation of dates
@@ -15,6 +14,7 @@ import { findPropertiesWithRange } from '@lblod/ember-generic-model-plugin-utils
  * @extends EmberService
  */
 export default Service.extend({
+  metaModelQuery: service(),
   store: service(),
   who: 'editor-plugins/date-card',
   outputDateFormat: 'DD/MM/YYYY',
@@ -33,7 +33,7 @@ export default Service.extend({
     const preprocessingMap = Object.assign(this.get('preprocessingFormatsMap'), config['preprocessingFormatsMap']);
     this.set('preprocessingMap', this.initPreprocessingMap(preprocessingMap));
     this.set('memoizedFindPropertiesWithRange',
-         memoize((classType, range) => findPropertiesWithRange(this.store, classType, range)));
+             memoize((classType, range) => this.metaModelQuery.findPropertiesWithRange(classType, range)));
   },
 
   /**
