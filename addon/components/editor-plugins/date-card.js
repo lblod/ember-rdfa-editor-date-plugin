@@ -13,18 +13,23 @@ import moment from 'moment';
 */
 export default Component.extend(InsertPrimitivePropertyCardMixin, {
   layout,
+  hintOwner: 'editor-plugins/date-card',
 
   isDateTime: computed('info.rdfaProperty.range.rdfaType', function(){
     return this.get('info.rdfaProperty.range.rdfaType') == 'http://www.w3.org/2001/XMLSchema#dateTime';
   }),
 
+  insert(propertyMeta, value, content){
+    let mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
+    this.get('hintsRegistry').removeHintsAtLocation(this.get('location'), this.get('hrId'), this.hintOwner);
+    this.get('editor').replaceTextWithHTML(...mappedLocation, this.getRdfa(propertyMeta, value, content), [{ who: 'editor-plugins/date-card' }]);
+  },
+
   actions: {
     async insert(data){
       this.insert(await data.rdfaProperty,
                   data.plainValue,
-                  data.rdfaContent,
-                  'editor-plugins/date-card',
-                  [{ who: 'editor-plugins/date-card' }]);
+                  data.rdfaContent);
     },
 
     async insertDateTime(data, hours, minutes){
@@ -33,10 +38,7 @@ export default Component.extend(InsertPrimitivePropertyCardMixin, {
       let value = `${data.plainValue} ${timeIfPresent}`;
 
       this.insert(await data.rdfaProperty,
-            value,
-            dateTimeIso,
-            'editor-plugins/date-card',
-                 [{ who: 'editor-plugins/date-card' }]);
+            value, dateTimeIso);
     }
   }
 });
