@@ -25,6 +25,14 @@ export default Component.extend(InsertPrimitivePropertyCardMixin, {
     this.get('editor').replaceTextWithHTML(...mappedLocation, this.getRdfa(propertyMeta, value, content), [{ who: 'editor-plugins/date-card' }]);
   },
 
+  formatStrDigits(digits){
+      if(!digits)
+        return '00';
+      if(digits < 10)
+        return '0' + digits;
+      return digits;
+    },
+
   actions: {
     async insert(data){
       this.insert(await data.rdfaProperty,
@@ -34,7 +42,7 @@ export default Component.extend(InsertPrimitivePropertyCardMixin, {
 
     async insertDateTime(data, hours, minutes){
       let dateTimeIso = moment(data.rdfaContent, data.rdfaContentDateFormat).hours(hours || 0).minutes(minutes || 0).toISOString();
-      let timeIfPresent = hours ? ` ${hours}:${minutes || '00'}` : '';
+      let timeIfPresent = hours ? ` ${hours}:${this.formatStrDigits(minutes)}` : '';
       let value = `${data.plainValue} ${timeIfPresent}`;
 
       this.insert(await data.rdfaProperty,
