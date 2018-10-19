@@ -1,7 +1,7 @@
 import { computed } from '@ember/object';
 import Component from '@ember/component';
 import layout from '../../templates/components/editor-plugins/date-card';
-import InsertPrimitivePropertyCardMixin from '@lblod/ember-generic-model-plugin-utils/mixins/insert-primitive-property-card-mixin';
+import InsertPrimitivePropertyCardMixin from '@lblod/ember-rdfa-editor-generic-model-plugin-utils/mixins/insert-primitive-property-card-mixin';
 import moment from 'moment';
 
 /**
