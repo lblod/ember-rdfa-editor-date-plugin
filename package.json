@@ -1,6 +1,6 @@
 {
   "name": "@lblod/ember-rdfa-editor-date-plugin",
-  "version": "0.7.7",
+  "version": "0.7.8",
   "description": "RDFa editor plugin to insert semantic dates in the editor",
   "keywords": [
     "ember-addon"
