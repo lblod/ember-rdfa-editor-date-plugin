@@ -7,6 +7,27 @@ import { task } from 'ember-concurrency';
 
 /**
  * Service responsible for correct annotation of dates
+ * ---------------------------------------------------
+ * CODE REVIEW NOTES
+ * ---------------------------------------------------
+ *
+ *  INTERACTION PATTERNS
+ *  --------------------
+ *  For all incoming contexts, first looks whether there is a context where a date datatype applies.
+ *  Then checks the incoming text for the applicable context, to see wether dates can be annotated.
+ *  Stores the locations of interesting bits of text in the hint registry.
+ *  The card stores the location along with the hintsRegistryIndex (hrId), and transforms it to current hrId on insert.
+ *
+ *
+ *  OTHER INFO
+ *  ----------
+ *  - uses metamodel plugin utils to:
+ *      1.  check wich property the date relates to.
+ *      2.  (as premature optimisation, so get rid of this) Some rdfa serialization utils of the date to insert.
+ * ---------------------------------------------------
+ * END CODE REVIEW NOTES
+ * ---------------------------------------------------
+ *
  *
  * @module editor-date-plugin
  * @class RdfaEditorDatePlugin
