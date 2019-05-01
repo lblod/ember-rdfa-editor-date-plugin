@@ -71,7 +71,7 @@ export default Service.extend({
     if(cards.length > 0){
       hintsRegistry.addHints(hrId, this.get('who'), cards);
     }
-  }).restartable(),
+  }),
 
   async detectRdfaPropertiesToUse(context){
     let lastTriple = context.context.slice(-1)[0] || {};
