@@ -231,7 +231,7 @@ export default Service.extend({
    */
   generateHintsForContext(context){
     const hints = [];
-    const stringToScan = context.text;
+    const stringToScan = context.text || '';
 
     for(let i=0; i < stringToScan.length; ++i){
       const dateString = stringToScan.slice(i);
