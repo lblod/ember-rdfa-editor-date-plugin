@@ -1,7 +1,6 @@
 # @lblod/ember-rdfa-editor-date-plugin
 
 Plugin to insert semantic dates in an RDFa editor
-=======
 
 Compatibility
 ------------------------------------------------------------------------------
@@ -13,7 +12,6 @@ Compatibility
 
 Installation
 ------------------------------------------------------------------------------
-
 ```
 ember install @lblod/ember-rdfa-editor
 ember install @lblod/ember-rdfa-editor-date-plugin
