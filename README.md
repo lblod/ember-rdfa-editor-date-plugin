@@ -1,8 +1,7 @@
 # @lblod/ember-rdfa-editor-date-plugin
 
-
 Plugin to insert semantic dates in an RDFa editor
-
+=======
 
 Compatibility
 ------------------------------------------------------------------------------
