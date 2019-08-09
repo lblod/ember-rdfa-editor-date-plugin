@@ -2,6 +2,7 @@ import { computed } from '@ember/object';
 import Component from '@ember/component';
 import layout from '../../templates/components/editor-plugins/date-card';
 import InsertPrimitivePropertyCardMixin from '@lblod/ember-rdfa-editor-generic-model-plugin-utils/mixins/insert-primitive-property-card-mixin';
+import { reads, not } from '@ember/object/computed';
 import moment from 'moment';
 
 /**
@@ -14,6 +15,18 @@ import moment from 'moment';
 export default Component.extend(InsertPrimitivePropertyCardMixin, {
   layout,
   hintOwner: 'editor-plugins/date-card',
+
+  isDateTime: computed('info.datatype', function(){
+    return this.get('info.datatype') == 'http://www.w3.org/2001/XMLSchema#dateTime';
+  }),
+
+  isValidInput: computed('isDateTime', 'minutes', 'hours', function() {
+  	const hours = parseInt(this.hours);
+  	const minutes = parseInt(this.minutes);
+    return !this.isDateTime || (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60);
+  }),
+
+  isInvalidInput: not('isValidInput'),
 
   isDateTime: computed('info.rdfaProperty.range.rdfaType', function(){
     return this.get('info.rdfaProperty.range.rdfaType') == 'http://www.w3.org/2001/XMLSchema#dateTime';

@@ -1,44 +1,43 @@
-<! -- SORRY MIET HACK ALERT !!! -->
-{{#if isDateTime }}
-  <div class="grid">
-    <form class="form col--12-12 col--1-1--s">
-      <div class="u-spacer--tiny">
-        Voeg <strong>{{info.plainValue}}</strong> op tijdstip
-        <div class="double-input js-double-input">
-          <div class="double-input__inputs">
-            <div class="double-input__input" style="width:30%">
-              {{input class="input-field input-field--block" placeholder="12" type="number" value=hour min=0 max=23}} uur
-            </div>
-            <div class="double-input__input" style="width:30%">
-              {{input class="input-field input-field--block" placeholder="00" type="number" value=minutes min=0 max=59}} minuten
-            </div>
-      </div>
-    </div>
-    <strong>{{info.rdfaProperty.label}}</strong> in.
-      </div>
-    </form>
-  </div>
-  {{#wu-button-group}}
-    {{wu-button
-      label="voeg toe"
-      size="small"
-      isNarrow=true
-      onClick=(action "insertDateTime" info hour minutes)
-    }}
-  {{/wu-button-group}}
+<Say::Hint @size="small" @type="sectioned" as |hint|>
+	{{#if isDateTime }}
+		<hint.header>
+	    Voeg <strong>{{info.plainValue}}</strong> op tijdstip <strong>{{info.rdfaProperty.label}}</strong> in.
+		</hint.header>
+		<hint.content @padded="small">
+	    <form class="form col--12-12 col--1-1--s">
+	      <div class="u-spacer--tiny">
+	        <div class="double-input js-double-input">
+	          <div class="double-input__inputs">
+	            <div class="double-input__input" style="width:30%">
+			        	<Say::Label>Tijdstip uur</Say::Label>
+		        		<Say::InputNumber @width="block" @type="number" @value={{this.hours}} @min="0" @max="23"></Say::InputNumber>
+	            </div>
+	            <div class="double-input__input" style="width:30%">
+			        	<Say::Label>minuten</Say::Label>
+		        		<Say::InputNumber @width="block" @type="number" @value={{this.minutes}} @min="0" @max="59"></Say::InputNumber>
+	            </div>
+			      </div>
+			    </div>
+	      </div>
+	    </form>
+		</hint.content>
+		<hint.footer>
+		  <Say::ActionGroup>
+			  <Say::Button @width="narrow" @onClick={{action "insertDateTime" info hours minutes}}>Voeg in</Say::Button>
+			  {{!-- <Say::Button @width="narrow" @style="alt" @onClick=null>Annuleer</Say::Button> --}}
+			</Say::ActionGroup>
+		</hint.footer>
 
-{{else}}
-  <div class="u-spacer--tiny">
-    Voeg <strong>{{info.plainValue}}</strong> als <strong>{{info.rdfaProperty.label}}</strong> in.
-  </div>
-  {{#wu-button-group}}
-    {{wu-button
-      label="voeg toe"
-      size="small"
-      isNarrow=true
-      onClick=(action "insert" info)
-    }}
-  {{/wu-button-group}}
-
-{{/if}}
+	{{else}}
+		<hint.header>
+	    Voeg <strong>{{info.plainValue}}</strong> als <strong>{{info.rdfaProperty.label}}</strong> in.
+		</hint.header>
+		<hint.footer>
+		  <Say::ActionGroup>
+			  <Say::Button @width="narrow" @onClick={{action "insert" info}}>Voeg in</Say::Button>
+			  {{!-- <Say::Button @width="narrow" @style="alt" @onClick=null>Annuleer</Say::Button> --}}
+			</Say::ActionGroup>
+		</hint.footer>
+	{{/if}}
+</Say::Hint>
 {{yield}}
