@@ -16,7 +16,7 @@ module.exports = {
   },
 
   async afterInstall(options) {
-    const pluginName = options.originBlueprintName.substr('ember-'.length);
+    const pluginName = options.originBlueprintName.substr('@lblod/ember-'.length);
 
     if( existsSync(profilesFile) ){
       try {
