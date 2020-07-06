@@ -12,7 +12,7 @@ module.exports = {
     return this.insertIntoFile(
       profilesFile,
       `    "${pluginName}",${afterContents}`,
-      { after: `  ${key}: \\[\n` });
+      { after: `  ${key}: [\n` });
   },
 
   async afterInstall(options) {
