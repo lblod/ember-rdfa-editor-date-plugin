@@ -1,4 +1,5 @@
 # @lblod/ember-rdfa-editor-date-plugin
+:warning: This ember addon is no longer maintained. Please use [@lblod/ember-rdfa-editor-lblod-plugins](https://github.com/lblod/ember-rdfa-editor-lblod-plugins) instead.
 
 Plugin to insert semantic dates in an RDFa editor
 
